@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>NJ Sports</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
+<style>
+* {
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Inter, Arial, sans-serif;
+}
+
+body {
+background:#0b1220;
+color:#e5e7eb;
+}
+
+/* HEADER */
+.header {
+background:#0f172a;
+padding:14px 20px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+border-bottom:1px solid rgba(255,255,255,0.08);
+}
+
+.logo {
+font-weight:800;
+color:#38bdf8;
+letter-spacing:2px;
+}
+
+/* LAYOUT */
+.container {
+display:grid;
+grid-template-columns: 220px 1fr 300px;
+gap:14px;
+padding:18px;
+}
+
+/* SIDEBAR */
+.sidebar {
+background:#0f172a;
+border-radius:12px;
+padding:14px;
+border:1px solid rgba(255,255,255,0.06);
+}
+
+.btn {
+width:100%;
+padding:10px;
+margin-bottom:8px;
+background:#111827;
+border:none;
+color:#cbd5e1;
+border-radius:8px;
+text-align:left;
+cursor:pointer;
+}
+
+.btn:hover {
+background:#1e293b;
+color:white;
+}
+
+/* CARDS */
+.card {
+background:#111827;
+border:1px solid rgba(255,255,255,0.06);
+border-radius:12px;
+padding:14px;
+margin-bottom:10px;
+}
+
+.small {
+font-size:13px;
+opacity:0.75;
+margin-top:4px;
+}
+
+/* FOLLOW BUTTON */
+.follow-btn {
+margin-top:8px;
+padding:6px 10px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+background:#1f2937;
+color:white;
+font-size:12px;
+}
+
+.follow-btn:hover {
+background:#334155;
+}
+
+/* RIGHT PANEL */
+.right {
+background:#0f172a;
+border-radius:12px;
+padding:14px;
+border:1px solid rgba(255,255,255,0.06);
+}
+
+.title {
+font-weight:700;
+margin-bottom:10px;
+}
+
+/* TICKER */
+.ticker {
+position:fixed;
+bottom:0;
+width:100%;
+background:black;
+padding:10px;
+overflow:hidden;
+white-space:nowrap;
+font-size:13px;
+color:#cbd5e1;
+}
+
+.ticker span {
+display:inline-block;
+padding-left:100%;
+animation:scroll 20s linear infinite;
+}
+
+@keyframes scroll {
+0% { transform:translateX(0); }
+100% { transform:translateX(-100%); }
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+<div class="logo">NJ SPORTS</div>
+</div>
+
+<div class="container">
+
+<!-- LEFT NAV -->
+<div class="sidebar">
+<button class="btn" onclick="show('home')">Home</button>
+<button class="btn" onclick="show('mlb')">MLB</button>
+<button class="btn" onclick="show('following')">My Feed</button>
+</div>
+
+<!-- CENTER -->
+<div>
+
+<!-- HOME -->
+<div id="home" class="section active">
+<div class="card">
+<b>Welcome to NJ Sports</b>
+<div class="small">Follow teams and players to customize your feed</div>
+</div>
+</div>
+
+<!-- MLB -->
+<div id="mlb" class="section">
+<div id="mlbGames"></div>
+</div>
+
+<!-- FOLLOWING -->
+<div id="following" class="section">
+<div class="card">
+<b>My Feed</b>
+<div class="small">Your followed teams and players</div>
+</div>
+<div id="myFeed"></div>
+</div>
+
+</div>
+
+<!-- RIGHT PANEL -->
+<div class="right">
+<div class="title">Trending</div>
+
+<div class="card">
+<b>Giannis Antetokounmpo</b>
+<div class="small">Trade rumors continue across the league</div>
+</div>
+
+<div class="card">
+<b>Yankees</b>
+<div class="small">Strong push in standings continues</div>
+</div>
+</div>
+
+</div>
+
+<!-- TICKER -->
+<div class="ticker">
+<span id="ticker">Loading sports data...</span>
+</div>
+
+<script>
+
+/* NAV */
+function show(id){
+document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+document.getElementById(id).classList.add("active");
+
+if(id === "following") renderFeed();
+}
+
+/* FOLLOW SYSTEM */
+let followed = JSON.parse(localStorage.getItem("followed")) || [];
+
+function toggleFollow(type, name){
+const key = type + ":" + name;
+
+if(followed.includes(key)){
+followed = followed.filter(f => f !== key);
+} else {
+followed.push(key);
+}
+
+localStorage.setItem("followed", JSON.stringify(followed));
+renderFeed();
+}
+
+/* SAMPLE DATA (REAL API CAN REPLACE THIS) */
+const sampleTeams = [
+"Yankees",
+"Dodgers",
+"Cubs",
+"Mets"
+];
+
+/* MLB DISPLAY */
+function loadMLB(){
+let html = "";
+let ticker = "";
+
+sampleTeams.forEach(team => {
+
+html += `
+<div class="card">
+<b>${team}</b>
+<div class="small">Click to follow this team</div>
+<button class="follow-btn" onclick="toggleFollow('team','${team}')">
+Follow / Unfollow
+</button>
+</div>
+`;
+
+ticker += team + " • ";
+});
+
+document.getElementById("mlbGames").innerHTML = html;
+document.getElementById("ticker").innerText = ticker;
+}
+
+/* MY FEED */
+function renderFeed(){
+let html = "";
+
+if(followed.length === 0){
+html = `<div class="card"><b>No follows yet</b><div class="small">Follow teams to build your feed</div></div>`;
+} else {
+followed.forEach(f => {
+html += `
+<div class="card">
+<b>${f}</b>
+<div class="small">Latest updates will appear here (API upgrade next step)</div>
+</div>
+`;
+});
+}
+
+document.getElementById("myFeed").innerHTML = html;
+}
+
+loadMLB();
+renderFeed();
+
+</script>
+
+</body>
+</html>
